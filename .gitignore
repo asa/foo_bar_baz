@@ -1,0 +1,14 @@
+bazel-*
+**/*.swp
+**/*.swo
+**/*.swn
+**/*.swm
+**/*.swk
+**/*.swl
+**/*.pyc
+**/*.swh
+**/*.swi
+**/*.swj
+**/*.swg
+
+**/*.DS_Store
