@@ -14,7 +14,7 @@ auto update(app_model m, app_action action) -> app_result {
         [&](bar::action a) -> app_result {
             auto [new_bar, eff] = bar::update(m.bar, a);
             m.bar = new_bar;
-            return {m, eff};  //
+            return {m, eff};
         },
         [&](baz::action a) -> app_result {
             auto [new_baz, eff] = baz::update(m.baz, a);
@@ -24,3 +24,11 @@ auto update(app_model m, app_action action) -> app_result {
 }
 
 }  // namespace core
+   /*
+   [](auto&& ctx) {
+                           auto& io = get<boost::asio::io_context>(ctx);
+                           io.post([] {
+                               cerr << "running something directly into the ios " << endl;  //
+                           });
+                       }
+                       */

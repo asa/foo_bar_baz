@@ -1,19 +1,4 @@
 cc_library(
-    name = "actions",
-    hdrs = [
-        "actions.hh",
-    ],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//bar",
-        "//baz",
-        "//common",
-        "//foo",
-        "@lager",
-    ],
-)
-
-cc_library(
     name = "core",
     srcs = [
         "core.cc",
@@ -21,7 +6,6 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        ":actions",
         "//bar",
         "//baz",
         "//common",

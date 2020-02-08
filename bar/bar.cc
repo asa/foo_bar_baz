@@ -7,7 +7,7 @@ auto update(model m, action a) -> result {
 
     return scelta::match(
         [&](bar_a_action a) -> result {
-            cerr << "do bar a action" << endl;
+            cerr << "do bar a action_______________________________" << endl;
             return {m, lager::noop};
         },
         [&](bar_b_action a) -> result {

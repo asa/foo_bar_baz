@@ -6,7 +6,6 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "//app:actions",
         "//bar",
         "//common",
         "@lager",

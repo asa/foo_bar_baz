@@ -9,12 +9,27 @@
 
 #include <lager/util.hpp>
 
-#include "app/actions.hh"
+#include "bar/bar.hh"
+#include "baz/baz.hh"
+#include "foo/foo.hh"
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
 namespace core {
+
+struct app_model {
+    foo::model foo;
+    bar::model bar;
+    baz::model baz;
+};
+
+using app_action = std::variant<foo::action,  //
+                                bar::action,  //
+                                baz::action>;
+
+using app_result = std::pair<app_model, lager::effect<app_action,  //
+                                                      lager::deps<boost::asio::io_context&>>>;
 
 auto update(app_model m, app_action action) -> app_result;
 
@@ -25,13 +40,13 @@ class app {
     /////////////////////////////////////////////////////////////////////
 
     app()
-        : store_{lager::make_store<app_action>(        //
-              core::app_model{},                       //
-              core::update,                            //
-              lager::with_boost_asio_event_loop{ios_}  //
-              )},                                      //
-          work_(ios_),                                 //
-          timer_(ios_),                                //
+        : store_{lager::make_store<app_action>(         //
+              core::app_model{},                        //
+              core::update,                             //
+              lager::with_boost_asio_event_loop{ios_},  //
+              lager::with_deps(std::ref(ios_)))},       //
+          work_(ios_),                                  //
+          timer_(ios_),                                 //
           socket_(ios_){};
 
     void timeout_handler(const boost::system::error_code&) {
@@ -56,6 +71,15 @@ class app {
             this->timeout_handler(ec);      //
         });
 
+        */
+
+        store_.dispatch(foo::foo_b_action{});  //
+        /*
+        store_.dispatch(bar::bar_a_action{});  //
+        store_.dispatch(baz::baz_a_action{});  //
+        store_.dispatch(foo::foo_b_action{});  //
+        store_.dispatch(bar::bar_b_action{});  //
+        store_.dispatch(baz::baz_b_action{});  //
         */
 
         ios_.run();

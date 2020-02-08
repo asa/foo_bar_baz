@@ -1,5 +1,6 @@
 #pragma once
 #include <lager/store.hpp>
+#include "bar/bar.hh"
 #include "common/common.hh"
 
 namespace foo {
@@ -15,7 +16,8 @@ struct foo_b_action {};
 
 using action = std::variant<foo_a_action, foo_b_action>;
 
-using result = std::pair<model, lager::effect<action>>;
+using result = std::pair<model, lager::effect<bar::action, action>>;
+// using result = std::pair<model, lager::effect<action>>;
 
 ////////////////////////////    reducers    ///////////////////////////////
 
