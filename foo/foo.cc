@@ -1,9 +1,11 @@
 #include "foo/foo.hh"
 #include "bar/bar.hh"
 
+#include "app/actions.hh"
+
 namespace foo {
 
-auto update(model m, action a) -> result {
+auto update(model m, action a) -> app_result {
     auto eff = [](auto&& ctx) { cerr << "foo effect" << endl; };
 
     return scelta::match(
