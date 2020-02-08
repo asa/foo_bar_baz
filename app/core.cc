@@ -24,11 +24,12 @@ auto update(app_model m, app_action action) -> app_result {
 }
 
 }  // namespace core
-   /*
+
+/*
    [](auto&& ctx) {
                            auto& io = get<boost::asio::io_context>(ctx);
                            io.post([] {
                                cerr << "running something directly into the ios " << endl;  //
                            });
                        }
-                       */
+*/
