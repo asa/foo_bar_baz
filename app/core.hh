@@ -6,6 +6,7 @@
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/signal_set.hpp>
 
 #include <lager/util.hpp>
 
@@ -50,7 +51,12 @@ class app {
               lager::with_deps(std::ref(ios_)))},       //
           work_(ios_),                                  //
           timer_(ios_),                                 //
-          socket_(ios_){};
+          socket_(ios_),                                //
+          signals_(ios_) {
+        signals_.add(SIGINT);
+        signals_.add(SIGTERM);
+        signals_.async_wait(std::bind(&app::handle_stop, this));
+    };
 
     void timeout_handler(const boost::system::error_code&) {
         timer_.async_wait([this](auto ec) {
@@ -62,7 +68,6 @@ class app {
     auto run() {
         watch(store_, draw_viz);
 
-        /*
         timer_.expires_from_now(boost::posix_time::millisec(1000));
 
         timer_.async_wait([this](auto ec) {
@@ -74,21 +79,28 @@ class app {
             this->timeout_handler(ec);      //
         });
 
-        */
-
         store_.dispatch(foo::foo_b_action{});  //
-        /*
         store_.dispatch(bar::bar_a_action{});  //
         store_.dispatch(baz::baz_a_action{});  //
         store_.dispatch(foo::foo_b_action{});  //
         store_.dispatch(bar::bar_b_action{});  //
         store_.dispatch(baz::baz_b_action{});  //
-        */
 
         store_.dispatch(baz::baz_a_action{});  //
-        ios_.run();
+
+        std::thread thread1{[&]() { ios_.run(); }};
+        std::thread thread2{[&]() { ios_.run(); }};
+
+        thread1.join();
+        thread2.join();
         cerr << "client.run is done" << endl;
     }
+
+    void handle_stop() {
+        cerr << "handle_stop" << endl;
+        ios_.stop();
+        cerr << "done_stop" << endl;
+    };
 
    private:
     lager::store<app_action, app_model> store_;
@@ -96,5 +108,6 @@ class app {
     boost::asio::ip::tcp::socket socket_;
     boost::asio::deadline_timer timer_;
     boost::asio::io_service::work work_;
+    boost::asio::signal_set signals_;
 };
 }  // namespace core
