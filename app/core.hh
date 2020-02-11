@@ -88,11 +88,13 @@ class app {
 
         store_.dispatch(baz::baz_a_action{});  //
 
-        std::thread thread1{[&]() { ios_.run(); }};
-        std::thread thread2{[&]() { ios_.run(); }};
+        for (size_t i = 0; i < thread_pool_.size(); i++) {
+            thread_pool_.at(i) = std::thread{[&]() { ios_.run(); }};
+        }
 
-        thread1.join();
-        thread2.join();
+        for (auto& thread : thread_pool_) {
+            thread.join();
+        }
         cerr << "client.run is done" << endl;
     }
 
@@ -109,5 +111,6 @@ class app {
     boost::asio::deadline_timer timer_;
     boost::asio::io_service::work work_;
     boost::asio::signal_set signals_;
+    std::array<std::thread, 8> thread_pool_;
 };
 }  // namespace core
