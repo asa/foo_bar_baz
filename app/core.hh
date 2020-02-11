@@ -28,12 +28,8 @@ using app_action = std::variant<foo::action,  //
                                 bar::action,  //
                                 baz::action>;
 
-/*
 using app_result = std::pair<app_model, lager::effect<app_action,  //
                                                       lager::deps<boost::asio::io_context&>>>;
-*/
-
-using app_result = std::pair<app_model, lager::effect<app_action>>;  //
 
 auto update(app_model m, app_action action) -> app_result;
 
@@ -50,10 +46,8 @@ class app {
         : store_{lager::make_store<app_action>(         //
               core::app_model{},                        //
               core::update,                             //
-              lager::with_boost_asio_event_loop{
-        ios_})//
-       //       , lager::with_deps(std::ref(ios_)))
-        },       //
+              lager::with_boost_asio_event_loop{ios_},  //
+              lager::with_deps(std::ref(ios_)))},       //
           work_(ios_),                                  //
           timer_(ios_),                                 //
           socket_(ios_){};
@@ -91,6 +85,7 @@ class app {
         store_.dispatch(baz::baz_b_action{});  //
         */
 
+        store_.dispatch(baz::baz_a_action{});  //
         ios_.run();
         cerr << "client.run is done" << endl;
     }

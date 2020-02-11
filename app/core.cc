@@ -19,17 +19,13 @@ auto update(app_model m, app_action action) -> app_result {
         [&](baz::action a) -> app_result {
             auto [new_baz, eff] = baz::update(m.baz, a);
             m.baz = new_baz;
-            return {std::move(m), eff};  //
+            return {std::move(m), [](auto&& ctx) {
+                        auto& io = get<boost::asio::io_context>(ctx);
+                        io.post([] {
+                            cerr << "running something directly into the ios " << endl;  //
+                        });
+                    }};  //
         })(std::move(action));
 }
 
 }  // namespace core
-
-/*
-   [](auto&& ctx) {
-                           auto& io = get<boost::asio::io_context>(ctx);
-                           io.post([] {
-                               cerr << "running something directly into the ios " << endl;  //
-                           });
-                       }
-*/
