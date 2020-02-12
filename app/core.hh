@@ -66,9 +66,7 @@ class app {
         cerr << "timeout finished" << endl;  //
     };
 
-    auto run() {
-        watch(store_, draw_viz);
-
+    auto fake_work() {
         timer_.expires_from_now(boost::posix_time::millisec(1000));
 
         timer_.async_wait([this](auto ec) {
@@ -88,14 +86,17 @@ class app {
         store_.dispatch(baz::baz_b_action{});  //
 
         store_.dispatch(baz::baz_a_action{});  //
+    };
 
-        auto num_threads = 8;
+    auto run(size_t num_threads = 8) {
+        watch(store_, draw_viz);
+
         for (size_t i = 0; i < num_threads; i++) {
             threads_.create_thread(boost::bind(&boost::asio::io_service::run, &ios_));
         }
 
+        fake_work();
         threads_.join_all();
-        cerr << "client.run is done" << endl;
     }
 
     void handle_stop() {
