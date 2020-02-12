@@ -7,6 +7,7 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/signal_set.hpp>
+#include <boost/thread.hpp>
 
 #include <lager/util.hpp>
 
@@ -88,13 +89,12 @@ class app {
 
         store_.dispatch(baz::baz_a_action{});  //
 
-        for (size_t i = 0; i < thread_pool_.size(); i++) {
-            thread_pool_.at(i) = std::thread{[&]() { ios_.run(); }};
+        auto num_threads = 8;
+        for (size_t i = 0; i < num_threads; i++) {
+            threads_.create_thread(boost::bind(&boost::asio::io_service::run, &ios_));
         }
 
-        for (auto& thread : thread_pool_) {
-            thread.join();
-        }
+        threads_.join_all();
         cerr << "client.run is done" << endl;
     }
 
@@ -106,11 +106,12 @@ class app {
 
    private:
     lager::store<app_action, app_model> store_;
+
     boost::asio::io_service ios_;
     boost::asio::ip::tcp::socket socket_;
     boost::asio::deadline_timer timer_;
     boost::asio::io_service::work work_;
     boost::asio::signal_set signals_;
-    std::array<std::thread, 8> thread_pool_;
+    boost::thread_group threads_;
 };
 }  // namespace core

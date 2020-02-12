@@ -11,6 +11,7 @@ cc_library(
         "//common",
         "//foo",
         "@boost//:asio",
+        "@boost//:thread",
         "@lager",
         "@scelta",
         "@zug",
