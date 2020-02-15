@@ -40,7 +40,7 @@ auto update_api_response(model m, api::response::responses a) -> api_result {
             return {std::move(m),
                     [data = a.data](auto&& ctx) {
                         // handle the data back in the foo module
-                        //       ctx.dispatch(foo::handle_db_data_action{data});  //
+                        ctx.dispatch(foo::handle_db_data_action{data});  //
                     }
 
             };

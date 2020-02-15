@@ -60,10 +60,10 @@ using api_result = pair<model,                                       //
                         lager::effect<                               //
                             lager::actions<api::request::requests,   //
                                            api::response::responses  //
-                                                                     // ,  foo::action
-                                           >>>;                      //
+                                           ,
+                                           foo::action>>>;  //
 
-using result = pair<model, lager::effect<action>>;
+using result = pair<model, lager::effect<lager::actions<action, foo::action>>>;
 
 ////////////////////////////    reducers    ///////////////////////////////
 
