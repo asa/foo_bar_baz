@@ -66,7 +66,7 @@ git_repository(
     name = "zug",
     commit = "be20cae36e7e5876bf5bfb08b2a0562e1db3b546",
     remote = "https://github.com/arximboldi/zug",
-    shallow_since = "1571094853 +0200",
+    shallow_since = "1573056673 +0100",
 )
 
 git_repository(

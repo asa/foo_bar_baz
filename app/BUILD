@@ -10,6 +10,7 @@ cc_library(
         "//baz",
         "//common",
         "//foo",
+        "//net:client",
         "@boost//:asio",
         "@boost//:thread",
         "@lager",

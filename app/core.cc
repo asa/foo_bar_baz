@@ -30,7 +30,12 @@ auto update(app_model m, app_action action) -> app_result {
                         cerr << std::this_thread::get_id() << endl;
                         io.post([] { cerr << "running something directly into the ios " << endl; });
                     }};
+        },
+        [&](net::client::action a) -> app_result {
+            auto [new_net_client, eff] = net::client::update(m.net_client, a);
+            m.net_client = new_net_client;
+            return {std::move(m), eff};
         })(std::move(action));
-}
+}  // namespace core
 
 }  // namespace core

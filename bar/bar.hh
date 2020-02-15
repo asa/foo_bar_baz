@@ -7,10 +7,13 @@ namespace bar {
 ////////////////////////////    model    /////////////////////////////
 struct model {
     int bar_id;
+    string data;
 };
 
 ////////////////////////////    actions     /////////////////////////////
-struct bar_a_action {};
+struct bar_a_action {
+    string data;
+};
 struct bar_b_action {};
 
 using action = std::variant<bar_a_action, bar_b_action>;

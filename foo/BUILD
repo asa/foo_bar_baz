@@ -8,6 +8,7 @@ cc_library(
     deps = [
         "//bar",
         "//common",
+        "//net:api",
         "@lager",
         "@scelta",
         "@zug",

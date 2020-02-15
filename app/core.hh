@@ -14,6 +14,7 @@
 #include "bar/bar.hh"
 #include "baz/baz.hh"
 #include "foo/foo.hh"
+#include "net/client.hh"
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -24,11 +25,14 @@ struct app_model {
     foo::model foo;
     bar::model bar;
     baz::model baz;
+    net::client::model net_client;
 };
 
-using app_action = std::variant<foo::action,  //
-                                bar::action,  //
-                                baz::action>;
+using app_action = std::variant<foo::action,         //
+                                bar::action,         //
+                                baz::action,         //
+                                net::client::action  //
+                                >;
 
 using app_result = std::pair<app_model, lager::effect<app_action,  //
                                                       lager::deps<boost::asio::io_context&>>>;
@@ -66,7 +70,7 @@ class app {
         cerr << "timeout finished" << endl;  //
     };
 
-    auto fake_work() {
+    auto do_some_work() {
         timer_.expires_from_now(boost::posix_time::millisec(1000));
 
         timer_.async_wait([this](auto ec) {
@@ -78,24 +82,24 @@ class app {
             this->timeout_handler(ec);      //
         });
 
-        store_.dispatch(foo::foo_b_action{});  //
+        store_.dispatch(foo::request_db_data_action{});  //
+
         store_.dispatch(bar::bar_a_action{});  //
         store_.dispatch(baz::baz_a_action{});  //
-        store_.dispatch(foo::foo_b_action{});  //
         store_.dispatch(bar::bar_b_action{});  //
         store_.dispatch(baz::baz_b_action{});  //
 
         store_.dispatch(baz::baz_a_action{});  //
     };
 
-    auto run(size_t num_threads = 8) {
+    auto run(size_t num_threads = 1) {
         watch(store_, draw_viz);
 
         for (size_t i = 0; i < num_threads; i++) {
             threads_.create_thread(boost::bind(&boost::asio::io_service::run, &ios_));
         }
 
-        fake_work();
+        do_some_work();
         threads_.join_all();
     }
 
