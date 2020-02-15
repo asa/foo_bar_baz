@@ -16,9 +16,9 @@ struct bar_a_action {
 };
 struct bar_b_action {};
 
-using action = std::variant<bar_a_action, bar_b_action>;
+using action = variant<bar_a_action, bar_b_action>;
 
-using result = std::pair<model, lager::effect<action>>;
+using result = pair<model, lager::effect<action>>;
 
 ////////////////////////////    reducers    ///////////////////////////////
 

@@ -15,9 +15,28 @@
 #include "baz/baz.hh"
 #include "foo/foo.hh"
 #include "net/client.hh"
+#include "net/svc.hh"
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
+
+namespace mock_data_svc {
+
+struct model {
+    net::svc::model svc;
+};
+
+struct nonce {};
+
+using action = variant<net::svc::action,  //
+                       nonce>;
+
+using result = pair<model, lager::effect<action,  //
+                                         lager::deps<boost::asio::io_context&>>>;
+
+auto update(model m, action action) -> result;
+
+}  // namespace mock_data_svc
 
 namespace core {
 
@@ -28,11 +47,11 @@ struct app_model {
     net::client::model net_client;
 };
 
-using app_action = std::variant<foo::action,         //
-                                bar::action,         //
-                                baz::action,         //
-                                net::client::action  //
-                                >;
+using app_action = variant<foo::action,         //
+                           bar::action,         //
+                           baz::action,         //
+                           net::client::action  //
+                           >;
 
 using app_result = std::pair<app_model, lager::effect<app_action,  //
                                                       lager::deps<boost::asio::io_context&>>>;
@@ -43,7 +62,6 @@ inline void draw_viz(app_model prev, app_model curr) {
     //
     cerr << "draw viz" << endl;
 }
-
 class app {
    public:
     /////////////////////////////////////////////////////////////////////
@@ -54,9 +72,24 @@ class app {
               core::update,                             //
               lager::with_boost_asio_event_loop{ios_},  //
               lager::with_deps(std::ref(ios_)))},       //
-          work_(ios_),                                  //
-          timer_(ios_),                                 //
-          socket_(ios_),                                //
+#if true
+          data_svc_{lager::make_store<net::svc::action>(  //
+              net::svc::model{},                          //
+              net::svc::update,                           //
+              lager::with_boost_asio_event_loop{ios_},    //
+              lager::with_deps(std::ref(ios_)))},         //
+
+#else
+
+          data_svc_{lager::make_store<mock_data_svc::action>(  //
+              mock_data_svc::model{},                          //
+              mock_data_svc::update,                           //
+              lager::with_boost_asio_event_loop{ios_},         //
+              lager::with_deps(std::ref(ios_)))},              //
+#endif
+          work_(ios_),    //
+          socket_(ios_),  //
+          timer_(ios_),   //
           signals_(ios_) {
         signals_.add(SIGINT);
         signals_.add(SIGTERM);
@@ -72,6 +105,8 @@ class app {
 
     auto do_some_work() {
         store_.dispatch(foo::request_db_data_action{});  //
+
+        data_svc_.dispatch(net::api::request::check_healthz{});  //
 
         /*
         store_.dispatch(bar::bar_a_action{});  //
@@ -117,10 +152,12 @@ class app {
    private:
     lager::store<app_action, app_model> store_;
 
+    lager::store<net::svc::action, net::svc::model> data_svc_;
+
     boost::asio::io_service ios_;
+    boost::asio::io_service::work work_;
     boost::asio::ip::tcp::socket socket_;
     boost::asio::deadline_timer timer_;
-    boost::asio::io_service::work work_;
     boost::asio::signal_set signals_;
     boost::thread_group threads_;
 };
