@@ -3,11 +3,6 @@
 namespace core {
 
 auto update(app_model m, app_action action) -> app_result {
-    auto eff = [](auto&& ctx) {
-        cerr << std::this_thread::get_id() << endl;
-        cerr << "app effect happens" << endl;
-    };
-
     return scelta::match(
         [&](foo::action a) -> app_result {
             auto [new_foo, eff] = foo::update(m.foo, a);
@@ -27,7 +22,7 @@ auto update(app_model m, app_action action) -> app_result {
             cerr << std::this_thread::get_id() << endl;
             return {std::move(m), [](auto&& ctx) {
                         auto& io = get<boost::asio::io_context>(ctx);
-                        cerr << std::this_thread::get_id() << endl;
+                        // cerr << std::this_thread::get_id() << endl;
                         io.post([] { cerr << "running something directly into the ios " << endl; });
                     }};
         },

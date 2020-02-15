@@ -71,27 +71,32 @@ class app {
     };
 
     auto do_some_work() {
-        timer_.expires_from_now(boost::posix_time::millisec(1000));
-
-        timer_.async_wait([this](auto ec) {
-            cerr << "done timer1" << endl;  //
-        });
-
-        timer_.async_wait([this](auto ec) {
-            cerr << "done timer2" << endl;  //
-            this->timeout_handler(ec);      //
-        });
-
         store_.dispatch(foo::request_db_data_action{});  //
 
+        /*
         store_.dispatch(bar::bar_a_action{});  //
         store_.dispatch(baz::baz_a_action{});  //
         store_.dispatch(bar::bar_b_action{});  //
         store_.dispatch(baz::baz_b_action{});  //
-
         store_.dispatch(baz::baz_a_action{});  //
+        */
     };
 
+    auto do_some_timed_work() {
+        /*
+            timer_.expires_from_now(boost::posix_time::millisec(1000));
+
+            timer_.async_wait([this](auto ec) {
+                cerr << "done timer1" << endl;  //
+            });
+
+            timer_.async_wait([this](auto ec) {
+                cerr << "done timer2" << endl;  //
+                this->timeout_handler(ec);      //
+            });
+
+            */
+    }
     auto run(size_t num_threads = 1) {
         watch(store_, draw_viz);
 
