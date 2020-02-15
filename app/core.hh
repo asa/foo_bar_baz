@@ -26,10 +26,7 @@ struct model {
     net::svc::model svc;
 };
 
-struct nonce {};
-
-using action = variant<net::svc::action,  //
-                       nonce>;
+using action = variant<net::svc::action>;
 
 using result = pair<model, lager::effect<action,  //
                                          lager::deps<boost::asio::io_context&>>>;
@@ -71,29 +68,19 @@ class app {
     /////////////////////////////////////////////////////////////////////
 
     app()
-        : store_{lager::make_store<app_action>(         //
-              core::app_model{},                        //
-              core::update,                             //
-              lager::with_boost_asio_event_loop{ios_},  //
-              lager::with_deps(std::ref(ios_)))},       //
-#if true
-          data_svc_{lager::make_store<net::svc::action>(  //
-              net::svc::model{},                          //
-              net::svc::update,                           //
-              lager::with_boost_asio_event_loop{ios_},    //
-              lager::with_deps(std::ref(ios_)))},         //
-
-#else
-
+        : store_{lager::make_store<app_action>(                //
+              core::app_model{},                               //
+              core::update,                                    //
+              lager::with_boost_asio_event_loop{ios_},         //
+              lager::with_deps(std::ref(ios_)))},              //
           data_svc_{lager::make_store<mock_data_svc::action>(  //
               mock_data_svc::model{},                          //
               mock_data_svc::update,                           //
               lager::with_boost_asio_event_loop{ios_},         //
               lager::with_deps(std::ref(ios_)))},              //
-#endif
-          work_(ios_),    //
-          socket_(ios_),  //
-          timer_(ios_),   //
+          work_(ios_),                                         //
+          socket_(ios_),                                       //
+          timer_(ios_),                                        //
           signals_(ios_) {
         signals_.add(SIGINT);
         signals_.add(SIGTERM);
@@ -156,7 +143,7 @@ class app {
    private:
     lager::store<app_action, app_model> store_;
 
-    lager::store<net::svc::action, net::svc::model> data_svc_;
+    lager::store<mock_data_svc::action, mock_data_svc::model> data_svc_;
 
     boost::asio::io_service ios_;
     boost::asio::io_service::work work_;

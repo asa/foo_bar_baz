@@ -3,16 +3,11 @@
 namespace mock_data_svc {
 
 auto update(model m, action action) -> result {
-    return scelta::match(
-        [&](net::svc::action a) -> result {
-            auto [new_svc, eff] = net::svc::update(m.svc, a);
-            m.svc = new_svc;
-            return {std::move(m), eff};
-        },
-        [&](auto) -> result {
-            cerr << "______________   should never get there _______________" << endl;
-            return {std::move(m), lager::noop};
-        })(std::move(action));
+    return scelta::match([&](net::svc::action a) -> result {
+        auto [new_svc, eff] = net::svc::update(m.svc, a);
+        m.svc = new_svc;
+        return {std::move(m), eff};
+    })(std::move(action));
 }
 }  // namespace mock_data_svc
 
