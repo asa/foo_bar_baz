@@ -29,7 +29,10 @@ auto update_api_request(model m, api::request::requests a) -> api_result {
         },
         [&](api::request::check_healthz a) -> api_result {
             cerr << "[svc] net::api::request::check_healthz" << endl;
-            return {std::move(m), lager::noop};  //
+            bool ok = true;
+            return {std::move(m), [ok](auto&& ctx) {
+                        ctx.dispatch(net::api::response::healthz{.ok = ok});  //
+                    }};                                                       //
         })(std::move(a));
 }
 
@@ -37,16 +40,13 @@ auto update_api_response(model m, api::response::responses a) -> api_result {
     return scelta::match(  //
         [&](api::response::db_data a) -> api_result {
             cerr << "[svc] net::api::response::db_data" << endl;
-            return {std::move(m),
-                    [data = a.data](auto&& ctx) {
+            return {std::move(m), [data = a.data](auto&& ctx) {
                         // handle the data back in the foo module
                         // ctx.dispatch(foo::handle_db_data_action{data});  //
-                    }
-
-            };
+                    }};
         },
         [&](api::response::healthz a) -> api_result {
-            cerr << "net::api::response::healthz" << endl;
+            cerr << "[svc] net::api::response::healthz" << endl;
             return {std::move(m), lager::noop};  //
         })(std::move(a));
 }

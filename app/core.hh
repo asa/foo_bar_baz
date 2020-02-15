@@ -26,7 +26,14 @@ struct model {
     net::svc::model svc;
 };
 
-using action = variant<net::svc::action>;
+struct websocket_send {
+    string msg;  // will be json
+};
+struct websocket_recv {
+    string msg;  // will be json
+};
+
+using action = variant<net::svc::action, websocket_send, websocket_recv>;
 
 using result = pair<model, lager::effect<action,  //
                                          lager::deps<boost::asio::io_context&>>>;
@@ -95,9 +102,11 @@ class app {
     };
 
     auto do_some_work() {
-        store_.dispatch(foo::request_db_data_action{});  //
-
-        data_svc_.dispatch(net::api::request::check_healthz{});  //
+        // store_.dispatch(foo::request_db_data_action{});  //
+        // data_svc_.dispatch(net::api::request::check_healthz{});         //
+        // data_svc_.dispatch(mock_data_svc::websocket_send{"db_get 1"});  //
+        data_svc_.dispatch(mock_data_svc::websocket_recv{"healthz"});   //
+        data_svc_.dispatch(mock_data_svc::websocket_recv{"db_get 1"});  //
 
         /*
         store_.dispatch(bar::bar_a_action{});  //
