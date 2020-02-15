@@ -2,16 +2,18 @@
 
 namespace mock_data_svc {
 
-auto update(model m, action action) -> result {
+auto update(model m, action action) -> svc_result {
     return scelta::match(
-        [&](net::svc::action a) -> result {
+        [&](net::svc::action a) -> svc_result {
             auto [new_svc, eff] = net::svc::update(m.svc, a);
             m.svc = new_svc;
             return {std::move(m), eff};
+            // return {std::move(m), lager::noop};
         },
-        [&](net::ws::action a) -> result {
+        [&](net::ws::action a) -> svc_result {
             // websocket is stateless, so we just use its effects???
             return {std::move(m), net::ws::dispatch_effect(a)};
+            // return {std::move(m), lager::noop};
         });
 }
 

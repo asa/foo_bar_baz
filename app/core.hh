@@ -29,10 +29,10 @@ struct model {
 
 using action = variant<net::svc::action, net::ws::action>;
 
-using result = pair<model, lager::effect<action,  //
-                                         lager::deps<boost::asio::io_context&>>>;
+using svc_result =
+    pair<model, lager::effect<lager::actions<action, net::api::action>, lager::deps<boost::asio::io_context&>>>;
 
-auto update(model m, action action) -> result;
+auto update(model m, action action) -> svc_result;
 
 }  // namespace mock_data_svc
 
