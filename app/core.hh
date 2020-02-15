@@ -28,9 +28,9 @@ struct model {
 };
 
 using action = variant<net::svc::action, net::ws::action>;
+// using action = variant<net::ws::action>;
 
-using svc_result =
-    pair<model, lager::effect<lager::actions<action, net::api::action>, lager::deps<boost::asio::io_context&>>>;
+using svc_result = pair<model, lager::effect<action, lager::deps<boost::asio::io_context&>>>;
 
 auto update(model m, action action) -> svc_result;
 
@@ -69,19 +69,22 @@ class app {
     /////////////////////////////////////////////////////////////////////
 
     app()
-        : store_{lager::make_store<app_action>(                //
-              core::app_model{},                               //
-              core::update,                                    //
-              lager::with_boost_asio_event_loop{ios_},         //
-              lager::with_deps(std::ref(ios_)))},              //
+        : store_{lager::make_store<app_action>(         //
+              core::app_model{},                        //
+              core::update,                             //
+              lager::with_boost_asio_event_loop{ios_},  //
+              lager::with_deps(std::ref(ios_)))},       //
+
           data_svc_{lager::make_store<mock_data_svc::action>(  //
               mock_data_svc::model{},                          //
               mock_data_svc::update,                           //
               lager::with_boost_asio_event_loop{ios_},         //
-              lager::with_deps(std::ref(ios_)))},              //
-          work_(ios_),                                         //
-          socket_(ios_),                                       //
-          timer_(ios_),                                        //
+              lager::with_deps(std::ref(ios_))                 //
+              )},                                              //
+
+          work_(ios_),    //
+          socket_(ios_),  //
+          timer_(ios_),   //
           signals_(ios_) {
         signals_.add(SIGINT);
         signals_.add(SIGTERM);
