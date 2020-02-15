@@ -25,7 +25,9 @@ auto update_api_request(model m, api::request::requests a) -> api_result {
     return scelta::match(  //
         [&](api::request::get_some_db_data a) -> api_result {
             cerr << "net::api::request::get_some_db_data" << endl;
-            return {std::move(m), lager::noop};
+            return {std::move(m), [data = a.id](auto&& ctx) {
+                        ctx.dispatch(net::api::response::db_data{std::to_string(data)});  //
+                    }};
         },
         [&](api::request::check_healthz a) -> api_result {
             cerr << "net::api::request::check_healthz" << endl;
