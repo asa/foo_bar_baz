@@ -54,11 +54,11 @@ auto update_api_response(model m, api::response::responses a) -> api_result {
 auto update_api(model m, api::action a) -> api_result {
     return scelta::match(  //
         [&](api::request::requests a) -> api_result {
-            cerr << "[svc] net::api::request" << endl;
+            //  cerr << "[svc] net::api::request" << endl;
             return update_api_request(m, a);
         },
         [&](api::response::responses a) -> api_result {
-            cerr << "[svc] net::api::response" << endl;
+            //   cerr << "[svc] net::api::response" << endl;
             return update_api_response(m, a);
         })(std::move(a));
 }
@@ -71,8 +71,7 @@ auto update(model m, action a) -> result {
             return {std::move(m), eff};
         },
         [&](api::action a) -> result {
-            cerr << "[svc] net:: api action" << endl;
-            return update_api(m, a);
+            return update_api(m, a);  //
         })(std::move(a));
 }
 

@@ -40,3 +40,18 @@ cc_library(
         "@zug",
     ],
 )
+
+cc_library(
+    name = "ws",
+    srcs = [
+        "ws.cc",
+        "ws.hh",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":api",
+        "@lager",
+        "@scelta",
+        "@zug",
+    ],
+)

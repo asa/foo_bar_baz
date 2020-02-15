@@ -39,11 +39,11 @@ struct client_connection_model {
 //   mock remote service
 
 struct DB {
-    // unordered_map<string, string> values_by_id;
+    unordered_map<string, string> values_by_id;
 };
 
 struct model {
-    //    vector<client_connection_model> connected_clients;
+    vector<client_connection_model> connected_clients;
     status_t status;
     DB db;
 };

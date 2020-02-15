@@ -12,6 +12,7 @@ cc_library(
         "//foo",
         "//net:client",
         "//net:svc",
+        "//net:ws",
         "@boost//:asio",
         "@boost//:thread",
         "@lager",
