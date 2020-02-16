@@ -35,12 +35,25 @@ auto decode_and_dispatch_message(opcode_t opcode, const data_t& data) -> effect_
     return lager::noop;
 };
 
+// TODO move this into the api area so we can directly keep it in sync
+auto send_websocket_down_the_wire(net::ws::send a) -> effect_t {
+    //
+    return lager::noop;
+};
+
+/*
+ *  handle encoding of actions -> raw websocket messages (opcode,data)
+ *  which is then sent out over ws::send
+ */
 auto encode_and_dispatch_message(net::api::action a) -> effect_t {
     std::stringstream ss;
 
     // cereal::BinaryOutputArchive archive(ss);
     cereal::JSONOutputArchive archive(ss);
 
+    // this match is necessary as a way to collapse from nested variants to calling archive on the struct / type
+    // TODO find a way to call this templated on the real underlying current type of the variant
+    // otherwise this is cumbersome to maintain
     scelta::match(  //
         [&](api::request::requests a) {
             scelta::match(                                                          //
@@ -56,8 +69,9 @@ auto encode_and_dispatch_message(net::api::action a) -> effect_t {
     const auto str = ss.str();
     const data_t data(str.begin(), str.end());
 
-    return [opcode = net::api::to_opcode(a), data = data](auto&& ctx) {
-        cerr << "encoded and dispatching opcode" << std::to_string(opcode) << endl;
+    // TODO remove string here, its just for debug print
+    return [opcode = net::api::to_opcode(a), data = data, str](auto&& ctx) {
+        cerr << "encoded and dispatching opcode " << std::to_string(int(opcode)) << " " << str << endl;
         ctx.dispatch(net::ws::send{opcode, data});  //
     };
 };
@@ -69,13 +83,11 @@ auto dispatch_effect(action action) -> effect_t {
             return encode_and_dispatch_message(a.action);
         },
         [&](send a) -> effect_t {
-            cerr << "dispatching websocket: opcode: " << std::hex << std::setfill('0') << std::setw(2) << (int)a.opcode
-                 << endl;
-            return lager::noop;
+            cerr << "dispatching websocket: opcode: " << int(a.opcode) << endl;
+            return send_websocket_down_the_wire(a);
         },
         [&](recv a) -> effect_t {
-            cerr << "recv on websocket: opcode: " << std::hex << std::setfill('0') << std::setw(2) << (int)a.opcode
-                 << endl;
+            cerr << "recv on websocket wire : opcode: " << int(a.opcode) << endl;
             return decode_and_dispatch_message(a.opcode, a.data);
         })(std::move(action));
 }

@@ -8,7 +8,8 @@ using std::byte;
 namespace net {
 namespace api {
 
-using opcode_t = int;  // move to uint8_t
+using opcode_t = int;
+// using opcode_t = uint8_t;
 
 namespace request {
 
@@ -50,7 +51,6 @@ using responses = variant<response::db_data,  //
 using action = variant<request::requests, response::responses>;
 
 inline auto to_opcode(net::api::action action) -> opcode_t {
-    cerr << "setting the opcode" << endl;
     return scelta::match(  //
         [&](api::request::requests a) -> opcode_t {
             scelta::match(                                                      //

@@ -17,11 +17,13 @@ using api::opcode_t;
 using std::vector;
 using data_t = vector<unsigned char>;
 
+// this action is called when we want to write directly to the wire
 struct send {
     opcode_t opcode;
     data_t data;
 };
 
+// read directly from the wire
 struct recv {
     opcode_t opcode;
     data_t data;
