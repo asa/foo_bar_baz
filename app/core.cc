@@ -10,7 +10,6 @@ auto update(model m, action action) -> svc_result {
             return {std::move(m), eff};
         },
         [&](net::ws::action a) -> svc_result {
-            // websocket is stateless, so we just use its effects???
             return {std::move(m), net::ws::dispatch_effect(a)};
         })(std::move(action));
 }

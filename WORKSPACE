@@ -82,6 +82,9 @@ cc_library(name="cereal",
         srcs=glob(["include/**/*.hpp"]),
         visibility = ["//visibility:public"],
         includes=["include"],
+        deps=[
+#                "@rapidjson"
+                ],
 )
         """,
     remote = "https://github.com/USCiLab/cereal.git",
@@ -100,4 +103,21 @@ cc_library(name="scelta",
     commit = "a0f4f701a33d03d6a9127da5c77e81d598bc7931",
     remote = "https://github.com/SuperV1234/scelta.git",
     shallow_since = "1557561051 +0100",
+)
+
+new_git_repository(
+    name = "rapidjson",
+    build_file_content = """
+licenses(["notice"])  # Apache 2
+
+cc_library(
+    name = "rapidjson",
+    hdrs = glob(["include/rapidjson/**/*.h"]),
+    defines = ["RAPIDJSON_HAS_STDSTRING=1"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+)
+        """,
+    commit = "a895ce150fa2d73f4ee55f8657761a6b3e96236f",
+    remote = "https://github.com/Tencent/rapidjson.git",
 )

@@ -1,4 +1,5 @@
 #pragma once
+#include <cereal/cereal.hpp>
 #include <lager/store.hpp>
 #include "common/common.hh"
 
@@ -20,7 +21,11 @@ struct recv {
     string msg;
 };
 
-using action = variant<send, recv>;
+struct encode {
+    net::api::action action;
+};
+
+using action = variant<send, recv, encode>;
 
 using effect_t = lager::effect<lager::actions<action, net::api::action>>;
 

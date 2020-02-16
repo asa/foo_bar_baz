@@ -101,9 +101,9 @@ class app {
     auto do_some_work() {
         // store_.dispatch(foo::request_db_data_action{});  //
         // data_svc_.dispatch(net::api::request::check_healthz{});         //
-        // data_svc_.dispatch(mock_data_svc::websocket_send{"db_get 1"});  //
-        data_svc_.dispatch(net::ws::recv{"healthz"});   //
-        data_svc_.dispatch(net::ws::recv{"db_get 1"});  //
+        data_svc_.dispatch(net::ws::recv{"healthz"});                             //
+        data_svc_.dispatch(net::ws::recv{"db_get 1"});                            //
+        data_svc_.dispatch(net::ws::encode{net::api::request::check_healthz{}});  //
 
         /*
         store_.dispatch(bar::bar_a_action{});  //
