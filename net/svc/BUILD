@@ -1,14 +1,14 @@
+# the remote data service
 cc_library(
-    name = "foo",
+    name = "svc",
     srcs = [
-        "foo.cc",
-        "foo.hh",
+        "svc.cc",
+        "svc.hh",
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "//bar",
-        "//common",
         "//net/api",
+        "//net/api:codec",
         "@lager",
         "@scelta",
         "@zug",

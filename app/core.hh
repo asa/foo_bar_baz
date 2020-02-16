@@ -14,9 +14,9 @@
 #include "bar/bar.hh"
 #include "baz/baz.hh"
 #include "foo/foo.hh"
-#include "net/client.hh"
-#include "net/svc.hh"
-#include "net/ws.hh"
+#include "net/client/client.hh"
+#include "net/svc/svc.hh"
+#include "net/ws/ws.hh"
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////

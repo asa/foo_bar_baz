@@ -1,4 +1,5 @@
-#include "net/ws.hh"
+#include "net/ws/ws.hh"
+
 #include <cereal/archives/binary.hpp>
 #include <cereal/archives/json.hpp>
 #include <cereal/types/memory.hpp>
@@ -70,7 +71,7 @@ auto encode_and_dispatch_message(net::api::action a) -> effect_t {
     const data_t data(str.begin(), str.end());
 
     // TODO remove string here, its just for debug print
-    return [opcode = net::api::to_opcode(a), data = data, str](auto&& ctx) {
+    return [opcode = net::api::codec::to_opcode(a), data = data, str](auto&& ctx) {
         cerr << "encoded and dispatching opcode " << std::to_string(int(opcode)) << " " << str << endl;
         ctx.dispatch(net::ws::send{opcode, data});  //
     };

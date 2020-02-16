@@ -3,52 +3,31 @@
 #include <lager/debug/cereal/struct.hpp>
 #include "common/common.hh"
 
+#include "net/api/codec.hh"
+
 using std::byte;
 
 namespace net {
 namespace api {
 
-using opcode_t = int;
-// using opcode_t = uint8_t;
-
 namespace request {
 
-struct get_some_db_data {
-    size_t id;
-};
-
-struct check_healthz {};
-
+// for each struct in the net api, setup its serialization
 LAGER_CEREAL_STRUCT(get_some_db_data, (id));
 LAGER_CEREAL_STRUCT(check_healthz);
-
-using requests = variant<request::get_some_db_data,  //
-                         request::check_healthz      //
-                         >;
 
 }  // namespace request
 
 namespace response {
 
-struct db_data {
-    string data;
-};
-
-struct healthz {
-    bool ok;
-};
-
 LAGER_CEREAL_STRUCT(db_data, (data));
 LAGER_CEREAL_STRUCT(healthz, (ok));
 
-using responses = variant<response::db_data,  //
-                          response::healthz   //
-                          >;
-
 }  // namespace response
 
-// action gathers up requests and responses
-using action = variant<request::requests, response::responses>;
+namespace codec {
+using opcode_t = int;
+// using opcode_t = uint8_t;
 
 inline auto to_opcode(net::api::action action) -> opcode_t {
     return scelta::match(  //
@@ -63,6 +42,8 @@ inline auto to_opcode(net::api::action action) -> opcode_t {
                 [&](api::response::healthz) -> opcode_t { return 4; })(std::move(a));
         })(std::move(action));
 }
+
+}  // namespace codec
 
 }  // namespace api
 }  // namespace net

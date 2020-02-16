@@ -1,14 +1,12 @@
 cc_library(
-    name = "foo",
+    name = "ws",
     srcs = [
-        "foo.cc",
-        "foo.hh",
+        "ws.cc",
+        "ws.hh",
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "//bar",
-        "//common",
-        "//net/api",
+        "//net/api:codec",
         "@lager",
         "@scelta",
         "@zug",

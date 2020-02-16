@@ -4,7 +4,8 @@
 #include "common/common.hh"
 
 #include <vector>
-#include "net/api.hh"
+#include "net/api/api.hh"
+#include "net/api/codec.hh"
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 //  handles deserialization of messages off the wire and dispatching
@@ -13,7 +14,7 @@
 namespace net {
 namespace ws {
 
-using api::opcode_t;
+using api::codec::opcode_t;
 using std::vector;
 using data_t = vector<unsigned char>;
 

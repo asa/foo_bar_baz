@@ -2,7 +2,7 @@
 #include <lager/store.hpp>
 #include "bar/bar.hh"
 #include "common/common.hh"
-#include "net/api.hh"
+#include "net/api/api.hh"
 
 namespace foo {
 
@@ -14,6 +14,7 @@ struct model {
 
 ////////////////////////////    actions     /////////////////////////////
 struct request_db_data_action {};
+
 struct handle_db_data_action {
     string data;
 };
