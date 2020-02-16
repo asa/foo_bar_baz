@@ -14,9 +14,8 @@
 namespace net {
 namespace ws {
 
+using api::codec::data_t;
 using api::codec::opcode_t;
-using std::vector;
-using data_t = vector<unsigned char>;
 
 // this action is called when we want to write directly to the wire
 struct send {

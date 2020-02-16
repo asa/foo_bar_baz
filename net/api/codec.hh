@@ -1,11 +1,15 @@
 #pragma once
+#include <cereal/archives/binary.hpp>
+#include <cereal/archives/json.hpp>
 #include <cereal/cereal.hpp>
+#include <cereal/types/memory.hpp>
 #include <lager/debug/cereal/struct.hpp>
 #include "common/common.hh"
 
 #include "net/api/codec.hh"
 
 using std::byte;
+using std::vector;
 
 namespace net {
 namespace api {
@@ -28,6 +32,7 @@ LAGER_CEREAL_STRUCT(healthz, (ok));
 namespace codec {
 using opcode_t = int;
 // using opcode_t = uint8_t;
+using data_t = vector<unsigned char>;
 
 inline auto to_opcode(net::api::action action) -> opcode_t {
     return scelta::match(  //
@@ -43,6 +48,32 @@ inline auto to_opcode(net::api::action action) -> opcode_t {
         })(std::move(action));
 }
 
+inline auto encode(net::api::action action) -> data_t {
+    std::stringstream ss;
+
+    // cereal::BinaryOutputArchive archive(ss);
+    cereal::JSONOutputArchive archive(ss);
+
+    // this match is necessary as a way to collapse from nested variants to calling archive on the struct / type
+    // TODO find a way to call this templated on the real underlying current type of the variant
+    // otherwise this is cumbersome to maintain
+    scelta::match(  //
+        [&](api::request::requests a) {
+            scelta::match(                                                          //
+                [&](api::request::get_some_db_data a) { archive(CEREAL_NVP(a)); },  //
+                [&](api::request::check_healthz a) { archive(CEREAL_NVP(a)); })(std::move(a));
+        },
+        [&](api::response::responses a) {
+            scelta::match(                                                  //
+                [&](api::response::db_data a) { archive(CEREAL_NVP(a)); },  //
+                [&](api::response::healthz a) { archive(CEREAL_NVP(a)); })(std::move(a));
+        })(std::move(action));
+
+    const auto str = ss.str();
+    const data_t data(str.begin(), str.end());
+
+    return data;
+}
 }  // namespace codec
 
 }  // namespace api

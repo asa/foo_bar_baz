@@ -1,8 +1,5 @@
 #include "net/ws/ws.hh"
 
-#include <cereal/archives/binary.hpp>
-#include <cereal/archives/json.hpp>
-#include <cereal/types/memory.hpp>
 #include <iomanip>
 #include <sstream>
 
@@ -47,32 +44,12 @@ auto send_websocket_down_the_wire(net::ws::send a) -> effect_t {
  *  which is then sent out over ws::send
  */
 auto encode_and_dispatch_message(net::api::action a) -> effect_t {
-    std::stringstream ss;
-
-    // cereal::BinaryOutputArchive archive(ss);
-    cereal::JSONOutputArchive archive(ss);
-
-    // this match is necessary as a way to collapse from nested variants to calling archive on the struct / type
-    // TODO find a way to call this templated on the real underlying current type of the variant
-    // otherwise this is cumbersome to maintain
-    scelta::match(  //
-        [&](api::request::requests a) {
-            scelta::match(                                                          //
-                [&](api::request::get_some_db_data a) { archive(CEREAL_NVP(a)); },  //
-                [&](api::request::check_healthz a) { archive(CEREAL_NVP(a)); })(std::move(a));
-        },
-        [&](api::response::responses a) {
-            scelta::match(                                                  //
-                [&](api::response::db_data a) { archive(CEREAL_NVP(a)); },  //
-                [&](api::response::healthz a) { archive(CEREAL_NVP(a)); })(std::move(a));
-        })(std::move(a));
-
-    const auto str = ss.str();
-    const data_t data(str.begin(), str.end());
+    const auto opcode = net::api::codec::to_opcode(a);
+    const auto data = net::api::codec::encode(a);
 
     // TODO remove string here, its just for debug print
-    return [opcode = net::api::codec::to_opcode(a), data = data, str](auto&& ctx) {
-        cerr << "encoded and dispatching opcode " << std::to_string(int(opcode)) << " " << str << endl;
+    return [opcode, data](auto&& ctx) {
+        cerr << "encoded and dispatching opcode " << std::to_string(int(opcode)) << endl;
         ctx.dispatch(net::ws::send{opcode, data});  //
     };
 };
