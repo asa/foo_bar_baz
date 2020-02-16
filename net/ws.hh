@@ -3,8 +3,8 @@
 #include <lager/store.hpp>
 #include "common/common.hh"
 
+#include <vector>
 #include "net/api.hh"
-
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 //  handles deserialization of messages off the wire and dispatching
@@ -13,12 +13,18 @@
 namespace net {
 namespace ws {
 
+using api::opcode_t;
+using std::vector;
+using data_t = vector<unsigned char>;
+
 struct send {
-    string msg;
+    opcode_t opcode;
+    data_t data;
 };
 
 struct recv {
-    string msg;
+    opcode_t opcode;
+    data_t data;
 };
 
 struct encode {

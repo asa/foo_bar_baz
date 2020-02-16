@@ -7,24 +7,34 @@
 namespace net {
 namespace ws {
 
-auto decode_and_dispatch_message(const string& msg) -> effect_t {
-    if (startswith(msg, "db_get")) {
-        size_t id = stoi(split(msg, ' ').at(1));
-        return [id](auto&& ctx) {
-            ctx.dispatch(net::api::request::get_some_db_data{id});  //
-        };
-    }
-    if (msg == "healthz") {
-        return [](auto&& ctx) {
-            ctx.dispatch(net::api::request::check_healthz{});  //
-        };
+auto dispatch = [](auto&& action) {
+    return [=](auto&& ctx) {
+        ctx.dispatch(action);  //
+    };
+};
+
+// TODO move this into the api area so we can directly keep it in sync
+auto decode_and_dispatch_message(opcode_t opcode, const data_t& data) -> effect_t {
+    // TODO actually  the data
+    // auto action = decode(opcode, data);
+    switch (opcode) {
+        case 1:
+            cerr << "decoded request::get_some_db_data{}" << endl;
+            return dispatch(net::api::request::get_some_db_data{});  //
+        case 2:
+            cerr << "decoded request::check_healthz{}" << endl;
+            return dispatch(net::api::request::check_healthz{});  //
+        case 3:
+            cerr << "decoded response::db_data{}" << endl;
+            return dispatch(net::api::response::db_data{});  //
+        case 4:
+            cerr << "decoded response::healthz{}" << endl;
+            return dispatch(net::api::response::healthz{});  //
     }
     return lager::noop;
 };
 
 auto encode_and_dispatch_message(net::api::action a) -> effect_t {
-    cerr << "encode a message" << endl;
-
     std::stringstream ss;
 
     // cereal::BinaryOutputArchive archive(ss);
@@ -42,10 +52,13 @@ auto encode_and_dispatch_message(net::api::action a) -> effect_t {
                 [&](api::response::healthz a) { archive(CEREAL_NVP(a)); })(std::move(a));
         })(std::move(a));
 
-    return [msg = ss.str()](auto&& ctx) {
-        ctx.dispatch(net::ws::send{msg});  //
+    const auto str = ss.str();
+    const data_t data(str.begin(), str.end());
+
+    return [opcode = net::api::opcode(a), data = data](auto&& ctx) {
+        ctx.dispatch(net::ws::send{opcode, data});  //
     };
-};  // namespace ws
+};
 
 auto dispatch_effect(action action) -> effect_t {
     return scelta::match(
@@ -54,12 +67,12 @@ auto dispatch_effect(action action) -> effect_t {
             return encode_and_dispatch_message(a.action);
         },
         [&](send a) -> effect_t {
-            cerr << "dispatching websocket: " << a.msg << endl;
+            cerr << "dispatching websocket: opcode:" << a.opcode << endl;
             return lager::noop;
         },
         [&](recv a) -> effect_t {
-            cerr << "recv on websocket: " << a.msg << endl;
-            return decode_and_dispatch_message(a.msg);
+            cerr << "recv on websocket: opcode:" << a.opcode << endl;
+            return decode_and_dispatch_message(a.opcode, a.data);
         })(std::move(action));
 }
 }  // namespace ws

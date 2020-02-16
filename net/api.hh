@@ -3,11 +3,12 @@
 #include <lager/debug/cereal/struct.hpp>
 #include "common/common.hh"
 
+using std::byte;
+
 namespace net {
 namespace api {
 
-// these actions make up the api between the client and the data svc
-///////////////////////////    actions     /////////////////////////////
+using opcode_t = uint8_t;
 
 namespace request {
 
@@ -47,6 +48,20 @@ using responses = variant<response::db_data,  //
 
 // action gathers up requests and responses
 using action = variant<request::requests, response::responses>;
+
+inline auto opcode(net::api::action a) -> opcode_t {
+    return scelta::match(  //
+        [&](api::request::requests a) -> opcode_t {
+            scelta::match(                                                      //
+                [&](api::request::get_some_db_data) -> opcode_t { return 1; },  //
+                [&](api::request::check_healthz) -> opcode_t { return 2; })(std::move(a));
+        },
+        [&](api::response::responses a) -> opcode_t {
+            scelta::match(                                              //
+                [&](api::response::db_data) -> opcode_t { return 3; },  //
+                [&](api::response::healthz) -> opcode_t { return 4; })(std::move(a));
+        })(std::move(a));
+}
 
 }  // namespace api
 }  // namespace net
