@@ -48,6 +48,23 @@ inline auto to_opcode(net::api::action action) -> opcode_t {
         })(std::move(action));
 }
 
+inline auto decode(opcode_t opcode, const data_t& data) -> net::api::action {
+    switch (opcode) {
+        case 1:
+            cerr << "decoded request::get_some_db_data{}" << endl;
+            return net::api::request::get_some_db_data{};  //
+        case 2:
+            cerr << "decoded request::check_healthz{}" << endl;
+            return net::api::request::check_healthz{};  //
+        case 3:
+            cerr << "decoded response::db_data{}" << endl;
+            return net::api::response::db_data{};  //
+        case 4:
+            cerr << "decoded response::healthz{}" << endl;
+            return net::api::response::healthz{};  //
+    }
+}
+
 inline auto encode(net::api::action action) -> data_t {
     std::stringstream ss;
 

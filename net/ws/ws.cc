@@ -14,23 +14,8 @@ auto dispatch = [](auto&& action) {
 
 // TODO move this into the api area so we can directly keep it in sync
 auto decode_and_dispatch_message(opcode_t opcode, const data_t& data) -> effect_t {
-    // TODO actually  the data
-    // auto action = decode(opcode, data);
-    switch (opcode) {
-        case 1:
-            cerr << "decoded request::get_some_db_data{}" << endl;
-            return dispatch(net::api::request::get_some_db_data{});  //
-        case 2:
-            cerr << "decoded request::check_healthz{}" << endl;
-            return dispatch(net::api::request::check_healthz{});  //
-        case 3:
-            cerr << "decoded response::db_data{}" << endl;
-            return dispatch(net::api::response::db_data{});  //
-        case 4:
-            cerr << "decoded response::healthz{}" << endl;
-            return dispatch(net::api::response::healthz{});  //
-    }
-    return lager::noop;
+    auto action = net::api::codec::decode(opcode, data);
+    return dispatch(action);
 };
 
 // TODO move this into the api area so we can directly keep it in sync
