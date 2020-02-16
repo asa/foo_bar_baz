@@ -1,6 +1,6 @@
 #include "net/ws.hh"
 #include <cereal/archives/binary.hpp>
-//#include <cereal/archives/json.hpp>
+#include <cereal/archives/json.hpp>
 #include <cereal/types/memory.hpp>
 #include <sstream>
 
@@ -27,17 +27,30 @@ auto encode_and_dispatch_message(net::api::action a) -> effect_t {
 
     std::stringstream ss;
 
-    cereal::BinaryOutputArchive archive(ss);
+    // cereal::BinaryOutputArchive archive(ss);
+    cereal::JSONOutputArchive archive(ss);
 
-    archive(a);
+    scelta::match(  //
+        [&](api::request::requests a) {
+            scelta::match(                                              //
+                [&](api::request::get_some_db_data a) { archive(a); },  //
+                [&](api::request::check_healthz a) { archive(a); })(std::move(a));
+        },
+        [&](api::response::responses a) {
+            scelta::match(                                      //
+                [&](api::response::db_data a) { archive(a); },  //
+                [&](api::response::healthz a) { archive(a); })(std::move(a));
+        })(std::move(a));
 
-    archive("blah");
-    cerr << ss.str() << endl;
+    //    archive(api::request::check_healthz{});
+    //    archive(api::request::get_some_db_data{123456});
+    // archive("blah");
+    cerr << ">" << ss.str() << "<" << endl;
 
-    return [](auto&& ctx) {
-        // ctx.dispatch(net::ws::send{"some serialized message"});  //
+    return [msg = ss.str()](auto&& ctx) {
+        ctx.dispatch(net::ws::send{msg});  //
     };
-};
+};  // namespace ws
 
 auto dispatch_effect(action action) -> effect_t {
     return scelta::match(

@@ -1,5 +1,6 @@
 #pragma once
 #include <cereal/cereal.hpp>
+#include <lager/debug/cereal/struct.hpp>
 #include "common/common.hh"
 
 namespace net {
@@ -16,6 +17,9 @@ struct get_some_db_data {
 
 struct check_healthz {};
 
+LAGER_CEREAL_STRUCT(get_some_db_data, (id));
+LAGER_CEREAL_STRUCT(check_healthz);
+
 using requests = variant<request::get_some_db_data,  //
                          request::check_healthz      //
                          >;
@@ -31,6 +35,9 @@ struct db_data {
 struct healthz {
     bool ok;
 };
+
+LAGER_CEREAL_STRUCT(db_data, (data));
+LAGER_CEREAL_STRUCT(healthz, (ok));
 
 using responses = variant<response::db_data,  //
                           response::healthz   //

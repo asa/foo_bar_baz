@@ -75,34 +75,23 @@ git_repository(
     remote = "https://github.com/arximboldi/lager.git",
 )
 
-new_git_repository(
+#new_git_repository(
+new_local_repository(
     name = "cereal",
     build_file_content = """
 cc_library(name="cereal",
         srcs=glob(["include/**/*.hpp"]),
         visibility = ["//visibility:public"],
         includes=["include"],
+        defines=["CEREAL_RAPIDJSON_NAMESPACE=rapidjson"],
         deps=[
-#                "@rapidjson"
+                "@rapidjson"
                 ],
 )
         """,
-    remote = "https://github.com/USCiLab/cereal.git",
-    tag = "v1.3.0",
-)
-
-new_git_repository(
-    name = "scelta",
-    build_file_content = """
-cc_library(name="scelta",
-        srcs=glob(["include/**/*.hpp"]),
-        visibility = ["//visibility:public"],
-        includes=["include"],
-)
-        """,
-    commit = "a0f4f701a33d03d6a9127da5c77e81d598bc7931",
-    remote = "https://github.com/SuperV1234/scelta.git",
-    shallow_since = "1557561051 +0100",
+    #    remote = "https://github.com/asa/cereal.git",
+    #    tag = "v1.3.0",
+    path = "../cereal",
 )
 
 new_git_repository(
@@ -120,4 +109,18 @@ cc_library(
         """,
     commit = "a895ce150fa2d73f4ee55f8657761a6b3e96236f",
     remote = "https://github.com/Tencent/rapidjson.git",
+)
+
+new_git_repository(
+    name = "scelta",
+    build_file_content = """
+cc_library(name="scelta",
+        srcs=glob(["include/**/*.hpp"]),
+        visibility = ["//visibility:public"],
+        includes=["include"],
+)
+        """,
+    commit = "a0f4f701a33d03d6a9127da5c77e81d598bc7931",
+    remote = "https://github.com/SuperV1234/scelta.git",
+    shallow_since = "1557561051 +0100",
 )
