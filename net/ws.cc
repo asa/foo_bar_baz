@@ -2,6 +2,7 @@
 #include <cereal/archives/binary.hpp>
 #include <cereal/archives/json.hpp>
 #include <cereal/types/memory.hpp>
+#include <iomanip>
 #include <sstream>
 
 namespace net {
@@ -55,7 +56,8 @@ auto encode_and_dispatch_message(net::api::action a) -> effect_t {
     const auto str = ss.str();
     const data_t data(str.begin(), str.end());
 
-    return [opcode = net::api::opcode(a), data = data](auto&& ctx) {
+    return [opcode = net::api::to_opcode(a), data = data](auto&& ctx) {
+        cerr << "encoded and dispatching opcode" << std::to_string(opcode) << endl;
         ctx.dispatch(net::ws::send{opcode, data});  //
     };
 };
@@ -67,11 +69,13 @@ auto dispatch_effect(action action) -> effect_t {
             return encode_and_dispatch_message(a.action);
         },
         [&](send a) -> effect_t {
-            cerr << "dispatching websocket: opcode:" << a.opcode << endl;
+            cerr << "dispatching websocket: opcode: " << std::hex << std::setfill('0') << std::setw(2) << (int)a.opcode
+                 << endl;
             return lager::noop;
         },
         [&](recv a) -> effect_t {
-            cerr << "recv on websocket: opcode:" << a.opcode << endl;
+            cerr << "recv on websocket: opcode: " << std::hex << std::setfill('0') << std::setw(2) << (int)a.opcode
+                 << endl;
             return decode_and_dispatch_message(a.opcode, a.data);
         })(std::move(action));
 }
